@@ -78,22 +78,13 @@ export const useAuthStore = create<AuthStore>()(
             throw new Error('No email found from Google account');
           }
 
-          const users = get().users;
-          let user = users.find(u => u.email === googleUser.email);
-
-          if (!user) {
-            user = {
-              id: googleUser.uid,
-              username: googleUser.displayName || googleUser.email.split('@')[0],
-              email: googleUser.email,
-              provider: 'google',
-              avatar: googleUser.photoURL || undefined
-            };
-
-            set(state => ({
-              users: [...state.users, user!]
-            }));
-          }
+          const user = {
+            id: googleUser.uid,
+            username: googleUser.displayName || googleUser.email.split('@')[0],
+            email: googleUser.email,
+            provider: 'google' as const,
+            avatar: googleUser.photoURL || undefined
+          };
 
           set({
             user,
@@ -102,9 +93,14 @@ export const useAuthStore = create<AuthStore>()(
           });
         } catch (error) {
           console.error('Google login error:', error);
+          
+          // Daha detaylı hata mesajları
           if (error instanceof Error) {
-            if (error.message.includes('redirect_uri_mismatch')) {
-              throw new Error('Authentication configuration error. Please try again later.');
+            if (error.message.includes('auth/unauthorized-domain')) {
+              throw new Error('This domain is not authorized. Please contact support.');
+            }
+            if (error.message.includes('popup_closed_by_user')) {
+              throw new Error('Login cancelled by user.');
             }
             throw error;
           }

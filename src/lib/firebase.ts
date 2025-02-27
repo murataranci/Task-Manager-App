@@ -11,28 +11,20 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Firebase'in başlatılıp başlatılmadığını kontrol et
-let app;
-try {
-  app = initializeApp(firebaseConfig);
-} catch (error) {
-  console.error('Firebase initialization error:', error);
-  throw error;
-}
-
+// Firebase'i başlat
+const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+
+// Google provider ayarları
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope('profile');
+googleProvider.addScope('email');
 
-// Google sign-in ayarları
-googleProvider.setCustomParameters({
-  prompt: 'select_account',
-  login_hint: 'user@example.com'
-});
-
-// Debug için
+// Hata ayıklama için
 if (import.meta.env.DEV) {
-  console.log('Firebase initialized with config:', {
+  console.log('Firebase Config:', {
+    authDomain: firebaseConfig.authDomain,
     projectId: firebaseConfig.projectId,
-    authDomain: firebaseConfig.authDomain
+    currentDomain: window.location.hostname
   });
 } 
